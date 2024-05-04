@@ -17,6 +17,7 @@ void Game::init(const std::string& config) {
 		int width, height, FL, FS;
 		file >> width >> height >> FL >> FS;
 		m_window.create(sf::VideoMode(width, height), "SFML_A2", FS == 1 ? sf::Style::Fullscreen : sf::Style::Default);
+		m_window.setFramerateLimit(FL);
 	}
 	else if (token == "Font") {
 		std::string fontPath;
