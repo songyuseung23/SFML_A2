@@ -27,9 +27,6 @@
     <ClCompile Include="Game.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerConfig.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Components.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

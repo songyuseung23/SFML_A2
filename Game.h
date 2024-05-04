@@ -3,25 +3,45 @@
 #include <SFML/Graphics.hpp>
 #include "EntityManager.h"
 
+struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
+struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
+struct BulletConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
+
 class Game {
 
-	sf::RenderWindow m_window;
-	EntityManager m_entities;
-	//Entity m_player; // Game 생성자에 Entity 기본 클래스가 없습니다 에러.
-	bool m_paused;
-	bool m_running;
+	sf::RenderWindow		m_window; 
+	EntityManager			m_entities; 
+	sf::Font				m_font; 
+	sf::Text				m_text; 
+	PlayerConfig			m_playerConfig;
+	EnemyConfig				m_enemyConfig;
+	BulletConfig			m_bulletConfig;
+	int						m_score = 0;
+	int						m_currentFrame = 0;
+	int						m_lastEnemySpawnTime = 0;
+	bool					m_paused = false; 
+	bool					m_running = true; 
+	
+	std::shared_ptr<Entity> m_player;
 
-	void init();
+	void init(const std::string& config); // init with given config file.
+	void setPaused(bool paused); // pause the game
+
+	void sMovement(); // System: Entity position / movement update
+	void sUserInput(); // System: User Input
+	void sLifespan(); // System: Lifespan
+	void sRender(); // System: Render / Drawing
+	void sEnemySpawner(); // System: Spawns Enemies
+	void sCollision(); // System: Collisions
+
+	void spawnPlayer();
+	void spawnEnemy();
+	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
+	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2& mousePos);
+	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
 public:
-
-	Game(const std::string&);
-
+	Game(const std::string& config);
 	void run();
-	void update();
-	void sMovement();
-	void sUserInput();
-	void sRender();
-	void sEnemySpawner();
-	void sCollision();
+	
 };
