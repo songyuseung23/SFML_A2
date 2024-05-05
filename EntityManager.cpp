@@ -6,12 +6,12 @@
 #include "EntityManager.h"
 
 void EntityManager::init() {
-
+	m_entites = std::vector<std::shared_ptr<Entity>>();
+	m_entityMap = std::map<std::string, EntityVector>();
 }
 
 EntityManager::EntityManager() {
-	m_entites = std::vector<std::shared_ptr<Entity>>();
-	m_entityMap = std::map<std::string, EntityVector>();
+	init();
 }
 
 std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag) {

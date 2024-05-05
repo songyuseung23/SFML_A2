@@ -1,8 +1,8 @@
 #include "Components.h"
 #include <SFML/Graphics.hpp>
 
-CTransform::CTransform(const Vec2& pos, const Vec2& speed, const float angle)
-	: pos(pos), speed(speed), angle(angle) {}
+CTransform::CTransform(const Vec2& pos, const Vec2& velocity, const float angle)
+	: pos(pos), velocity(velocity), angle(angle) {}
 
 CShape::CShape(float radius, int points, const sf::Color& fillColor, const sf::Color& outlineColor, int thickness) 
 	: circle(radius, points)

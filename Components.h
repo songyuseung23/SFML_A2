@@ -4,12 +4,12 @@
 
 class CTransform {
 
+public:
 	Vec2 pos = { 0, 0 };
-	Vec2 speed = { 0,0 };
+	Vec2 velocity = { 0, 0 };
 	float angle = 0;
 
-public:
-	CTransform(const Vec2& pos, const Vec2& speed, const float angle);
+	CTransform(const Vec2& pos, const Vec2& velocity, const float angle);
 };
 
 class CShape {

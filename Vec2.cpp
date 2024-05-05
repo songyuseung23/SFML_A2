@@ -54,6 +54,9 @@ bool Vec2::operator != (const Vec2& rhs) const {
 
 const Vec2 Vec2::normalize() const {
 
+	if (this->length() == 0)
+		return Vec2(0, 0);
+
 	return 
 		Vec2(x / this->length(), y / this->length());
 }
