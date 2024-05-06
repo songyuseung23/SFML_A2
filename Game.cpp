@@ -96,9 +96,9 @@ void Game::run()
 			sEnemySpawner();
 			sMovement();
 			sCollision();
-			sUserInput();
+			
 		}
-
+		sUserInput();
 		// execute whether pause or not
 		sRender();
 	}
@@ -133,8 +133,6 @@ void Game::sMovement() {
 
 		Vec2 normal = e->cTransform->velocity.normalize();
 		e->cTransform->velocity = normal * m_playerConfig.S;
-
-		std::cout << e->cTransform->velocity.x << ", " << e->cTransform->velocity.y << "\n";
 
 		auto transform = e->cTransform;
 		e->cTransform->pos += e->cTransform->velocity;
@@ -176,6 +174,23 @@ void Game::sUserInput() {
 				case sf::Keyboard::D:
 					m_player->cInput->right = true;
 					break;
+
+				case sf::Keyboard::Escape:
+					m_running = false;
+					break;
+
+				case sf::Keyboard::P:
+					{
+						if (m_paused == true)
+						{
+							setPaused(false);
+						}
+						else 
+						{
+							setPaused(true);
+						}
+						break;
+					}
 				}
 			}
 
@@ -208,7 +223,8 @@ void Game::sRender(){
 
 	m_window.clear(sf::Color::Black);
 	for (auto e : m_entities.getEntities()) {
-
+		
+		e->cShape->circle.rotate(1.0f);
 		m_window.draw(e->cShape->circle);
 	}
 	
