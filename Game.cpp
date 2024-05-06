@@ -1,6 +1,7 @@
 #include "Game.h"
 #include <string>
 #include <fstream>
+#include <random>
 
 // public
 Game::Game(const std::string& config) {
@@ -89,25 +90,33 @@ void Game::run()
 	while (m_running) {
 
 		m_entities.Update();
-
-		// if game is running
-		if (!m_paused) {
+		
+		if (!m_paused) { // if game is running
 
 			sEnemySpawner();
 			sMovement();
-			sCollision();
-			
+			sCollision(); 
 		}
-		sUserInput();
-		// execute whether pause or not
-		sRender();
-	}
 
-	m_currentFrame++;
+		sUserInput(); 
+		sRender();
+
+		m_currentFrame++;
+	}
 }
 
 void Game::sEnemySpawner() {
-
+	
+	// Spawns every specified frame in config file
+	if (m_currentFrame % m_enemyConfig.SI == 0)
+		spawnEnemy();
+	
+	// look through which enemy has dead
+	for (auto e : m_entities.getEntities("enemy")) {
+		// spawn small entities when enemy has dead.
+		if (e->isActive() == false)
+			spawnSmallEnemies(e);
+	}
 }
 
 void Game::sMovement() {
@@ -129,10 +138,10 @@ void Game::sMovement() {
 
 			if (e->cInput->right)
 				e->cTransform->velocity.x = 1.0f;
-		}
 
-		Vec2 normal = e->cTransform->velocity.normalize();
-		e->cTransform->velocity = normal * m_playerConfig.S;
+			Vec2 normal = e->cTransform->velocity.normalize();
+			e->cTransform->velocity = normal * m_playerConfig.S;
+		}
 
 		auto transform = e->cTransform;
 		e->cTransform->pos += e->cTransform->velocity;
@@ -141,7 +150,44 @@ void Game::sMovement() {
 }
 
 void Game::sCollision() {
+	// TODO
+	// enemy / window
+	for (auto e : m_entities.getEntities("enemy"))
+	{
+		float CR = e->cCollision->radius;
+		Vec2& currPos = e->cTransform->pos;
+		Vec2& currVel = e->cTransform->velocity;
 
+		if (currPos.x + CR >= m_window.getSize().x || currPos.x < CR)
+			currVel.x *= -1.0f;
+		if (currPos.y + CR >= m_window.getSize().y || currPos.y < CR)
+			currVel.y *= -1.0f;
+	}
+
+	// enemy / bullet
+	// enemy / player
+
+	// player / enemy
+	// player / window - prevent go further
+	{
+		float CR = m_player->cCollision->radius;
+		Vec2& currPos = m_player->cTransform->pos;
+		Vec2& currVel = m_player->cTransform->velocity;
+
+		if (currPos.x + CR >= m_window.getSize().x)
+			currPos.x = m_window.getSize().x - CR;
+		else if (currPos.x < CR)
+			currPos.x = CR;
+
+		if (currPos.y + CR >= m_window.getSize().y)
+			currPos.y = m_window.getSize().y - CR;
+		else if (currPos.y < CR)
+			currPos.y = CR;
+	}
+
+	// player / small enemies.
+
+	// bullet enemy - mark either entities dead.
 }
 
 void Game::sUserInput() {
@@ -215,6 +261,10 @@ void Game::sUserInput() {
 					break;
 				}
 			}
+
+			if (event.type == event.MouseButtonPressed) {
+
+			}
 		}
 	}
 }
@@ -222,6 +272,7 @@ void Game::sUserInput() {
 void Game::sRender(){
 
 	m_window.clear(sf::Color::Black);
+
 	for (auto e : m_entities.getEntities()) {
 		
 		e->cShape->circle.rotate(1.0f);
@@ -244,10 +295,40 @@ void Game::sLifespan()
 
 void Game::spawnEnemy()
 {
+	auto entity = m_entities.addEntity("enemy");
+
+	float rx = randNumGenerator(m_enemyConfig.SR, m_window.getSize().x - m_enemyConfig.SR);
+	float ry = randNumGenerator(m_enemyConfig.SR, m_window.getSize().y - m_enemyConfig.SR);
+
+	// TODO : random generated velociy that magnitude is specified in config file with 'speed'
+	float speed = randNumGenerator(m_enemyConfig.SMIN, m_enemyConfig.SMAX);
+	float dirx = randNumGenerator(0.0f, 1.0f);
+	float diry = sqrt(1 - dirx * dirx);
+	entity->cTransform = std::make_shared<CTransform>(
+		Vec2(rx, ry), Vec2(dirx * speed, diry * speed), 0.0f
+	);
+
+	int rn = randNumGenerator(m_enemyConfig.VMIN, m_enemyConfig.VMAX);
+	int SR = randNumGenerator(0, 255);
+	int SG = randNumGenerator(0, 255);
+	int SB = randNumGenerator(0, 255);
+
+	entity->cShape = std::make_shared<CShape>(
+		m_enemyConfig.SR,
+		rn,
+		sf::Color(SR, SG, SB),
+		sf::Color(m_enemyConfig.OR, m_enemyConfig.OG, m_enemyConfig.OB),
+		m_enemyConfig.OT
+	);
+
+	entity->cCollision = std::make_shared<CCollision>(m_enemyConfig.CR);
+
+	entity->cScore = std::make_shared<CScore>(rn * 100);
 }
 
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 {
+	// TODO : small enemies has lifespan
 }
 
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2& mousePos)
@@ -258,5 +339,18 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
 {
 }
 
+int Game::randNumGenerator(int min, int max) {
 
+	int range = max - min + 1;
+	return min + rand() % range;
+}
 
+float Game::randNumGenerator(float min, float max) {
+
+	std::random_device rd; 
+	std::mt19937 gen(rd()); 
+
+	std::uniform_real_distribution<float> dis(min, max); 
+
+	return dis(gen);
+}

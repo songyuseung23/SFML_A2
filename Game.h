@@ -40,6 +40,9 @@ class Game {
 	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2& mousePos);
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
+	int randNumGenerator(int max, int min);
+	float randNumGenerator(float max, float min);
+
 public:
 	Game(const std::string& config);
 	void run();
