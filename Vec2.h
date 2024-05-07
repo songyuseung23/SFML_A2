@@ -12,10 +12,10 @@ public:
 	bool operator == (const Vec2& rhs) const;
 	bool operator != (const Vec2& rhs) const;
 
-	Vec2 operator + (const Vec2& rhs);
-	Vec2 operator - (const Vec2& rhs);
-	Vec2 operator * (float mul);
-	Vec2 operator / (float div);
+	Vec2 operator + (const Vec2& rhs) const;
+	Vec2 operator - (const Vec2& rhs) const;
+	Vec2 operator * (float mul) const;
+	Vec2 operator / (float div) const;
 
 	void operator += (const Vec2& rhs);
 	void operator -= (const Vec2& rhs);

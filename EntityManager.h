@@ -10,7 +10,7 @@ typedef std::map<std::string, EntityVector> EntityMap;
 
 class EntityManager {
 
-	EntityVector m_entites;
+	EntityVector m_entities;
 	EntityVector m_toAdd;
 	EntityMap m_entityMap;
 	size_t m_totalEntites = 0;

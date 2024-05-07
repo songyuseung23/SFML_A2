@@ -6,7 +6,7 @@
 #include "EntityManager.h"
 
 void EntityManager::init() {
-	m_entites = std::vector<std::shared_ptr<Entity>>();
+	m_entities = std::vector<std::shared_ptr<Entity>>();
 	m_entityMap = std::map<std::string, EntityVector>();
 }
 
@@ -25,20 +25,32 @@ void EntityManager::Update() {
 
 	for (auto e : m_toAdd)
 	{
-		m_entites.push_back(e);
+		m_entities.push_back(e);
 		m_entityMap[e->tag()].push_back(e);
 	}
 	m_toAdd.clear();
 
-	for (auto e : m_entites) {
-		// remove e which marked as dead from m_entities
-		// remove e which marked as dead from m_entityMap
+	for (auto e : m_entities) {
+		if (e == NULL) // error prevent : iterator error
+			continue;
 
+		if (e->isActive() == false)
+		{	
+			// erase pointer from m_entities
+			m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), e), m_entities.end()); 
+
+			// erase pointer from map that holds entity vector by tag
+			EntityVector& temp = m_entityMap[e->tag()];
+			temp.erase(std::remove(temp.begin(), temp.end(), e), temp.end());
+		}
+
+		// erase object that pointed by e
+		e.reset();
 	}
 }
 
 EntityVector& EntityManager::getEntities() {
-	return m_entites;
+	return m_entities;
 }
 
 EntityVector& EntityManager::getEntities(const std::string& tag) {

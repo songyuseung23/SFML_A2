@@ -6,19 +6,19 @@ Vec2::Vec2() {}
 
 Vec2::Vec2(float x, float y) : x(x), y(y) {}
 
-Vec2 Vec2::operator + (const Vec2& rhs) {
+Vec2 Vec2::operator + (const Vec2& rhs) const {
 	return Vec2(x + rhs.x, y + rhs.y);
 }
 
-Vec2 Vec2::operator - (const Vec2& rhs) {
+Vec2 Vec2::operator - (const Vec2& rhs) const {
 	return Vec2(x - rhs.x, y - rhs.y);
 }
 
-Vec2 Vec2::operator * (float mul) {
+Vec2 Vec2::operator * (float mul) const {
 	return Vec2(x * mul, y * mul);
 }
 
-Vec2 Vec2::operator / (float div) {
+Vec2 Vec2::operator / (float div) const {
 	return Vec2(x / div, y / div);
 }
 
