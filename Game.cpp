@@ -32,6 +32,7 @@ void Game::init(const std::string& config) {
 			if (m_font.loadFromFile("Resources/" + fontPath)) {
 				int size, R, G, B;
 				file >> size >> R >> G >> B;
+				m_text.setFont(m_font);
 				m_text.setFillColor(sf::Color(R, G, B));
 				m_text.setCharacterSize(size);
 			}
@@ -98,7 +99,7 @@ void Game::run()
 			sCollision(); 
 		}
 
-		sUserInput(); 
+		sUserInput();
 		sRender();
 
 		m_currentFrame++;
@@ -111,13 +112,6 @@ void Game::sEnemySpawner() {
 	// Spawns every specified frame in config file
 	if (m_currentFrame % m_enemyConfig.SI == 0)
 		spawnEnemy();
-	
-	// look through which enemy has dead
-	for (auto e : m_entities.getEntities("enemy")) {
-		// spawn small entities when enemy has dead.
-		if (e->isActive() == false)
-			spawnSmallEnemies(e);
-	}
 }
 
 void Game::sMovement() {
@@ -144,6 +138,9 @@ void Game::sMovement() {
 			e->cTransform->velocity = normal * m_playerConfig.S;
 		}
 
+		if (e->tag() == "shield")
+			e->cTransform->pos = m_player->cTransform->pos; // always follow player's position
+
 		auto transform = e->cTransform;
 		e->cTransform->pos += e->cTransform->velocity;
 		e->cShape->circle.setPosition(e->cTransform->pos.x , e->cTransform->pos.y);
@@ -151,43 +148,15 @@ void Game::sMovement() {
 }
 
 void Game::sCollision() {
-	// TODO
-	// enemy / window
-	for (auto e : m_entities.getEntities("enemy"))
-	{
-		float CR = e->cCollision->radius;
-		Vec2& currPos = e->cTransform->pos;
-		Vec2& currVel = e->cTransform->velocity;
 
-		if (currPos.x + CR >= m_window.getSize().x || currPos.x < CR)
-			currVel.x *= -1.0f;
-		if (currPos.y + CR >= m_window.getSize().y || currPos.y < CR)
-			currVel.y *= -1.0f;
+	// increase shiled's Collision Radius gradually
+	for (auto shield : m_entities.getEntities("shield")) {
+
+		float lifespan = shield->cLifespan->total;
+		float& CR = shield->cCollision->radius;
+		CR += 3 * m_playerConfig.CR / lifespan;
 	}
-
-	// enemy / bullet
-	for (auto e : m_entities.getEntities("enemy"))
-	{
-		for (auto b : m_entities.getEntities("bullet"))
-		{
-			Vec2& ePos = e->cTransform->pos;
-			Vec2& bPos = b->cTransform->pos;
-
-			double dis = (ePos - bPos).length();
-
-			// when two entities collide
-			if (dis <= e->cCollision->radius + b->cCollision->radius)
-			{
-				e->destroy();
-				spawnSmallEnemies(e);
-				b->destroy();
-			}
-		}
-	}
-
-	// enemy / player
-
-	// player / enemy
+		
 	// player / window - prevent go further
 	{
 		float CR = m_player->cCollision->radius;
@@ -205,9 +174,108 @@ void Game::sCollision() {
 			currPos.y = CR;
 	}
 
-	// player / small enemies.
+	// enemy / window
+	for (auto e : m_entities.getEntities("enemy"))
+	{
+		float CR = e->cCollision->radius;
+		Vec2& currPos = e->cTransform->pos;
+		Vec2& currVel = e->cTransform->velocity;
 
-	// bullet enemy - mark either entities dead.
+		if (currPos.x + CR >= m_window.getSize().x || currPos.x < CR)
+			currVel.x *= -1.0f;
+		if (currPos.y + CR >= m_window.getSize().y || currPos.y < CR)
+			currVel.y *= -1.0f;
+	}
+
+	// enemy / bullet, shield
+	for (auto e : m_entities.getEntities("enemy"))
+	{
+		for (auto b : m_entities.getEntities("bullet"))
+		{
+			Vec2& ePos = e->cTransform->pos;
+			Vec2& bPos = b->cTransform->pos;
+
+			double dis = (ePos - bPos).length();
+
+			// when two entities collide
+			if (dis <= e->cCollision->radius + b->cCollision->radius)
+			{
+				m_score += e->cScore->score;
+				e->destroy();
+				spawnSmallEnemies(e); 
+				b->destroy();
+			}
+		}
+
+		for (auto shield : m_entities.getEntities("shield"))
+		{
+			Vec2& ePos = e->cTransform->pos;
+			Vec2& shieldPos = shield->cTransform->pos;
+
+			double dis = (ePos - shieldPos).length();
+
+			if (dis <= e->cCollision->radius + shield->cCollision->radius)
+			{
+				m_score += e->cScore->score;
+				e->destroy();
+			}
+		}
+	}
+
+	// player / enemy
+	for (auto e : m_entities.getEntities("enemy"))
+	{
+		Vec2& ePos = e->cTransform->pos;
+		Vec2& playerPos = m_player->cTransform->pos;
+
+		double dis = (ePos - playerPos).length();
+
+		// when two entities collide
+		if (dis <= e->cCollision->radius + m_player->cCollision->radius)
+		{
+			e->destroy();
+			
+			float mx = m_window.getSize().x / 2;
+			float my = m_window.getSize().y / 2;
+			
+			m_score -= e->cScore->score;
+			m_player->cTransform->pos.x = mx;
+			m_player->cTransform->pos.y = my;
+		}
+	}
+	
+	// player / small enemies.
+	for (auto e : m_entities.getEntities("small_enemy"))
+	{
+		Vec2& ePos = e->cTransform->pos;
+		Vec2& playerPos = m_player->cTransform->pos;
+
+		double dis = (ePos - playerPos).length();
+
+		// when two entities collide
+		if (dis <= e->cCollision->radius + m_player->cCollision->radius)
+		{
+			e->destroy();
+
+			float mx = m_window.getSize().x / 2;
+			float my = m_window.getSize().y / 2;
+
+			m_score -= e->cScore->score;
+			m_player->cTransform->pos.x = mx;
+			m_player->cTransform->pos.y = my;
+		}
+
+		for (auto shield : m_entities.getEntities("shield"))
+		{
+			Vec2& ePos = e->cTransform->pos;
+			Vec2& shieldPos = shield->cTransform->pos;
+
+			double dis = (ePos - shieldPos).length();
+
+			if (dis <= e->cCollision->radius + shield->cCollision->radius)
+				e->destroy();
+		}
+	}
 }
 
 void Game::sUserInput() {
@@ -248,13 +316,19 @@ void Game::sUserInput() {
 				case sf::Keyboard::P:
 					{
 						if (m_paused == true)
-						{
 							setPaused(false);
-						}
 						else 
-						{
 							setPaused(true);
+						break;
+					}
+				case sf::Keyboard::R:
+					{
+						if (m_cooltime <= 0)
+						{
+							m_cooltime = spawnSpecialWeapon(m_player);
+							// Show message in window.
 						}
+							
 						break;
 					}
 				}
@@ -305,18 +379,38 @@ void Game::sRender(){
 	for (auto e : m_entities.getEntities()) {
 		
 		e->cShape->circle.rotate(1.0f);
-		// entity only which has cLifespan Component : bullet, small enemies
+		// entity only which has cLifespan Component : bullet, small enemies, shield
 		if (e->cLifespan) 
 		{
+			int lifespan = e->cLifespan->total;
 			sf::Color FC = e->cShape->circle.getFillColor();
-			FC.a -= (255 / e->cLifespan->total);
+			if (FC.a <= 0)
+				FC.a = 0;
+			else
+				FC.a -= (255 / lifespan);
 			e->cShape->circle.setFillColor(FC);
 
 			sf::Color OC = e->cShape->circle.getOutlineColor();
-			OC.a -= (255 / e->cLifespan->total);
+			if (OC.a <= 0)
+				OC.a = 0;
+			else
+				OC.a -= (255 / lifespan); 
 			e->cShape->circle.setOutlineColor(OC);
 		}
+
+		// scale shield scale gradually
+		if (e->tag() == "shield")
+		{
+			float lifespan = e->cLifespan->total;
+			float scaleF = e->cShape->circle.getScale().x + 3 / lifespan;
+			e->cShape->circle.setScale(sf::Vector2f(scaleF, scaleF));
+		}
 		m_window.draw(e->cShape->circle);
+	}
+	
+	{
+		m_text.setString("Score : " + std::to_string( m_score ));
+		m_window.draw(m_text);
 	}
 	
 	m_window.display();
@@ -331,19 +425,17 @@ void Game::setPaused(bool paused)
 
 void Game::sLifespan()
 {
-	// bullet
-	for (auto e : m_entities.getEntities("bullet")) {
-		e->cLifespan->remaining -= 1;
-		if (e->cLifespan->remaining == 0)
-			e->destroy();
-	}
+	for (auto e : m_entities.getEntities()) {
+		if (!e->cLifespan)
+			continue;
 
-	// small enemy
-	for (auto e : m_entities.getEntities("small_enemy")) {
+		// entity that has cLifespan component : bullet, shield, small enemy
 		e->cLifespan->remaining -= 1;
 		if (e->cLifespan->remaining == 0)
 			e->destroy();
 	}
+	if(m_cooltime > 0)
+		m_cooltime--;
 }
 
 void Game::spawnEnemy()
@@ -405,6 +497,8 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 
 		se->cShape = std::make_shared<CShape>(*(entity->cShape));
 		se->cShape->circle.setRadius(originSR / 2);
+
+		se->cScore = std::make_shared<CScore>(entity->cScore->score);
 	}
 }
 
@@ -430,9 +524,28 @@ void Game::spawnBullet(std::shared_ptr<Entity> player, Vec2& target)
 	entity->cLifespan = std::make_shared<CLifespan>(m_bulletConfig.L);
 }
 
-void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
+int Game::spawnSpecialWeapon(std::shared_ptr<Entity> player)
 {
-	std::cout << "Special Weapon\n";
+	// TODO : Radial shield that scales as time goes, and also has lifespan that 
+	auto shield = m_entities.addEntity("shield");
+
+	shield->cTransform = std::make_shared<CTransform>(player->cTransform->pos, Vec2(0, 0), 0.0f);
+	
+	shield->cShape = std::make_shared<CShape>(
+		m_playerConfig.SR,
+		m_playerConfig.V,
+		sf::Color::Transparent,
+		sf::Color::Magenta,
+		m_playerConfig.OT
+	);
+
+	const int lifespan = 120; // 60fr * 2s = 180frame
+	const int cooltime = 600; // 10s
+	shield->cLifespan = std::make_shared<CLifespan>(lifespan); // change
+
+	shield->cCollision = std::make_shared<CCollision>(m_playerConfig.CR); // changes as frame pass
+
+	return cooltime;
 }
 
 int Game::randNumGenerator(int min, int max) {

@@ -34,6 +34,7 @@ void EntityManager::Update() {
 		if (e == NULL) // error prevent : iterator error
 			continue;
 
+		// if entity is dead
 		if (e->isActive() == false)
 		{	
 			// erase pointer from m_entities
@@ -42,10 +43,10 @@ void EntityManager::Update() {
 			// erase pointer from map that holds entity vector by tag
 			EntityVector& temp = m_entityMap[e->tag()];
 			temp.erase(std::remove(temp.begin(), temp.end(), e), temp.end());
-		}
 
-		// erase object that pointed by e
-		e.reset();
+			// erase object that pointed by e
+			e.reset();
+		}
 	}
 }
 
