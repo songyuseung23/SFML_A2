@@ -12,8 +12,8 @@ Game::Game(const std::string& config) {
 
 // Read Config File, Instantiate EntityManager, Call spawnPlayer
 void Game::init(const std::string& config) {
-
-	std::ifstream file("Resources/" + config);
+	std::string basePath = "C:\\Users\\A\\Desktop\\C++\\Study_GameProgramming_C++\\SFML_A2\\Resources/";
+	std::ifstream file(basePath + config);
 
 	if (!file.is_open())
 		std::cerr << "Failed to Open File : " << config << '\n';
@@ -29,7 +29,7 @@ void Game::init(const std::string& config) {
 		else if (token == "Font") {
 			std::string fontPath;
 			file >> fontPath;
-			if (m_font.loadFromFile("Resources/" + fontPath)) {
+			if (m_font.loadFromFile(basePath + fontPath)) {
 				int size, R, G, B;
 				file >> size >> R >> G >> B;
 				m_text.setFont(m_font);
@@ -321,16 +321,6 @@ void Game::sUserInput() {
 							setPaused(true);
 						break;
 					}
-				case sf::Keyboard::R:
-					{
-						if (m_cooltime <= 0)
-						{
-							m_cooltime = spawnSpecialWeapon(m_player);
-							// Show message in window.
-						}
-							
-						break;
-					}
 				}
 			}
 
@@ -359,13 +349,20 @@ void Game::sUserInput() {
 			if (event.type == event.MouseButtonPressed) {
 				if (event.mouseButton.button == sf::Mouse::Left) 
 				{
-					Vec2 mousePos(event.mouseButton.x, event.mouseButton.y);
-					spawnBullet(m_player, mousePos);
+					if(!m_paused)
+					{
+						Vec2 mousePos(event.mouseButton.x, event.mouseButton.y);
+						spawnBullet(m_player, mousePos);
+					}
 				}
 
 				if (event.mouseButton.button == sf::Mouse::Right)
 				{
-					spawnSpecialWeapon(m_player);
+					if (m_cooltime <= 0 && (!m_paused))
+					{
+						m_cooltime = spawnSpecialWeapon(m_player);
+						// Show message in window.
+					}
 				}
 			}
 		}
