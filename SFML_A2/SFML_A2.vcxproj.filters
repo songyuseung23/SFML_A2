@@ -15,39 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SFML_A2\src\main.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SFML_A2\src\EntityManager.cpp">
+    <ClCompile Include="src\EntityManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SFML_A2\src\Entity.cpp">
+    <ClCompile Include="src\Entity.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SFML_A2\src\Game.cpp">
+    <ClCompile Include="src\Game.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SFML_A2\src\Components.cpp">
+    <ClCompile Include="src\Components.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SFML_A2\src\Vec2.cpp">
+    <ClCompile Include="src\Vec2.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SFML_A2\header\EntityManager.h">
+    <ClInclude Include="header\EntityManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SFML_A2\header\Entity.h">
+    <ClInclude Include="header\Entity.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SFML_A2\header\Vec2.h">
+    <ClInclude Include="header\Vec2.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SFML_A2\header\Components.h">
+    <ClInclude Include="header\Components.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SFML_A2\header\Game.h">
+    <ClInclude Include="header\Game.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

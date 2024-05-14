@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "../header/Game.h"
 #include <string>
 #include <fstream>
 #include <random>
@@ -12,8 +12,8 @@ Game::Game(const std::string& config) {
 
 // Read Config File, Instantiate EntityManager, Call spawnPlayer
 void Game::init(const std::string& config) {
-	std::string basePath = "C:\\Users\\A\\Desktop\\C++\\Study_GameProgramming_C++\\SFML_A2\\Resources/";
-	std::ifstream file(basePath + config);
+	std::string basePath = "SFML_A2\\Resources\\"; // Set Path Relative to $(ProjectDir) 
+	std::ifstream file(basePath + config); 
 
 	if (!file.is_open())
 		std::cerr << "Failed to Open File : " << config << '\n';

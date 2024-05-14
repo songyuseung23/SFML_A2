@@ -1,5 +1,5 @@
 
-#include "Vec2.h"
+#include "../header/Vec2.h"
 #include <math.h>
 
 Vec2::Vec2() {}

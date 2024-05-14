@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "Entity.h"
-#include "EntityManager.h"
+#include "../header/Entity.h"
+#include "../header/EntityManager.h"
 
 void EntityManager::init() {
 	m_entities = std::vector<std::shared_ptr<Entity>>();

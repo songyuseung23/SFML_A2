@@ -1,4 +1,4 @@
-#include "Components.h"
+#include "../header/Components.h"
 #include <SFML/Graphics.hpp>
 
 CTransform::CTransform(const Vec2& pos, const Vec2& velocity, const float angle)
